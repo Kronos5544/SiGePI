@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from Vista.VentanaPrincipal import VentanaPrincipal
+from Presentador.PresentadorExam import PresentadorExam
 
 class PresentadorPrincipal:
     def __init__(self):
@@ -12,4 +13,8 @@ class PresentadorPrincipal:
         self.__vista = VentanaPrincipal(self)
         self.__vista.show()
         app.exec()
+
+    def gestionarExam(self):
+        gestionar_exam = PresentadorExam()
+        gestionar_exam.iniciar()
         
