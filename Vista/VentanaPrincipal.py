@@ -10,3 +10,4 @@ class VentanaPrincipal(QMainWindow):
 
         self.salir_btn.clicked.connect(self.close)
         self.gest_exam_btn.clicked.connect(self.__presentador.gestionarExam)
+        

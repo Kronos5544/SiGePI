@@ -14,7 +14,10 @@ class PresentadorPrincipal:
         self.__vista.show()
         app.exec()
 
+    #Iniciar Ventana Gestionar Exámenes
     def gestionarExam(self):
         gestionar_exam = PresentadorExam()
         gestionar_exam.iniciar()
+
+
         
