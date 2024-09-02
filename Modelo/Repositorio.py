@@ -73,6 +73,12 @@ class Repositorio:
 
 #------------CRUD (Create Read Update Delete) de las clases Examenes------------------------------
     def insertarExamGen(self, examen):
+        """
+        Comprueba si el examen existe en la tabla antes de insertarlo y de existir lanza un error
+        :param examen: Objeto ExamenGen que se desea insertar en la tabla Examen
+        :return: None
+        """
+
         consulta = f"""
         SELECT * FROM PUBLIC."Examen" WHERE "Fecha" = '{examen.fecha}'
         """
@@ -88,6 +94,9 @@ class Repositorio:
             raise Exception("El examen ya existe")
         
     def obtenerExamGen(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todos los examenes generales en forma de Objeto Examen
+        """
         consulta = f"""
         SELECT * FROM Public."Examen"
         """
@@ -99,6 +108,12 @@ class Repositorio:
         return lista_exam_gen
     
     def actualizarExamGen(self, exam_anterior, exam):
+        """
+        :param exam_anterior: Objeto ExamenGen que representa el examen que se quiere actualizar
+        :param exam: Objeto ExamenaGen que representa los cambios a realizar
+        :return: None
+        """
+
         consulta = f"""
         UPDATE PUBLIC."Examen"
         SET "Fecha" = '{exam.fecha}', "Asignatura" = '{exam.asignatura}', "Calificado" = {exam.calificado}
@@ -107,6 +122,10 @@ class Repositorio:
         self.__conexion.cons_sin_retorno(consulta)
 
     def eliminarExamGen(self, exam):
+        """
+        :param exam: Objeto ExamenGen que representa el examen que se quiere eliminar
+        :return: None
+        """
         consulta = f"""
         DELETE FROM Public."Examen" 
         WHERE "Fecha" = '{exam.fecha}'
@@ -114,6 +133,12 @@ class Repositorio:
         self.__conexion.cons_sin_retorno(consulta)
 
     def insertarExamEsp(self, exam):
+        """
+        Comprueba si el examen existe en la tabla y de existir, no lo inserta, de lo contrario lo inserta
+        :param exam: Objeto ExamenEsp a insertar en la tabla
+        :return: None 
+        """
+
         consulta = f"""
         SELECT * FROM "ExamenEsp" WHERE "EstId" = '{exam.est_id}' AND "Fecha" = '{exam.fecha}'
         """
@@ -128,6 +153,9 @@ class Repositorio:
             raise Exception("El estudiante ya ha sido calificado en este examen")
         
     def obtenerExamEsp(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todos los examenes generales en forma de Objeto ExamenEsp
+        """
         consulta = """
         SELECT * FROM PUBLIC."ExamenEsp"
         """
@@ -141,6 +169,11 @@ class Repositorio:
 
 
     def actualizarExamEsp(self, exam_anterior, exam):
+        """
+        :param exam_anterior: Objeto ExamenEsp que representa el examen que se quiere actualizar
+        :param exam: Objeto ExamenaEsp que representa los cambios a realizar
+        :return: None
+        """
         consulta = f"""
         UPDATE PUBLIC."ExamenEsp"
         SET "EstId" = '{exam.est_id}', "Calificacion" = {exam.calificacion}, "DescOrt" = {exam.desc_ort}
@@ -149,11 +182,15 @@ class Repositorio:
         self.__conexion.cons_sin_retorno(consulta)
 
     def eliminarExamEsp(self, exam):
+        """
+        :param exam: Objeto ExamenEsp que representa el examen que se quiere eliminar
+        :return: None
+        """
+
         consulta = f"""
         DELETE FROM PUBLIC."ExamenEsp"
         WHERE "Fecha" = '{exam.fecha}' AND "EstId" = '{exam.est_id}'
         """
-        
         self.__conexion.cons_sin_retorno(consulta)
 
 
