@@ -1,4 +1,6 @@
 from Modelo.Objetivo import Objetivo
+from Modelo.ExamenGen import ExamenGen
+from Modelo.ExamenEsp import ExamenEsp
 from Modelo.ListaEnlazada import ListaEnlazada
 from Modelo.Conexion import Conexion
 
@@ -44,7 +46,7 @@ class Repositorio:
             listaObj.agregar(objetivo)
         return listaObj
     
-    def actualizar_obj(self, obj_anterior, obj):
+    def actualizarObj(self, obj_anterior, obj):
         """
         :param obj_anterior: Objeto Objetivo al que se desea actualizar
         :param obj: Objeto Objetivo que contiene los cambios a realizar
@@ -58,7 +60,7 @@ class Repositorio:
         """
         self.__conexion.cons_sin_retorno(consulta)
 
-    def eliminar_obj(self, obj):
+    def eliminarObj(self, obj):
         """
         :param obj: Objeto Objetivo a eliminar
         :return: None
@@ -69,5 +71,89 @@ class Repositorio:
         """
         self.__conexion.cons_sin_retorno(consulta)
 
+#------------CRUD (Create Read Update Delete) de las clases Examenes------------------------------
+    def insertarExamGen(self, examen):
+        consulta = f"""
+        SELECT * FROM PUBLIC."Examen" WHERE "Fecha" = '{examen.fecha}'
+        """
+        comp = self.__conexion.cons_un_valor(consulta)
+
+        if comp is None:
+            consulta = f"""
+            INSERT INTO Public."Examen" 
+            VALUES ('{examen.fecha}', '{examen.asignatura}', default)
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        else:
+            raise Exception("El examen ya existe")
+        
+    def obtenerExamGen(self):
+        consulta = f"""
+        SELECT * FROM Public."Examen"
+        """
+        lista_exam_gen = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for exam in lista:
+            examen = ExamenGen(exam[0], exam[1], exam[2])
+            lista_exam_gen.agregar(examen)
+        return lista_exam_gen
+    
+    def actualizarExamGen(self, exam_anterior, exam):
+        consulta = f"""
+        UPDATE PUBLIC."Examen"
+        SET "Fecha" = '{exam.fecha}', "Asignatura" = '{exam.asignatura}', "Calificado" = {exam.calificado}
+        WHERE "Fecha" = '{exam_anterior.fecha}'
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+
+    def eliminarExamGen(self, exam):
+        consulta = f"""
+        DELETE FROM Public."Examen" 
+        WHERE "Fecha" = '{exam.fecha}'
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+
+    def insertarExamEsp(self, exam):
+        consulta = f"""
+        SELECT * FROM "ExamenEsp" WHERE "EstId" = '{exam.est_id}' AND "Fecha" = '{exam.fecha}'
+        """
+        comp = self.__conexion.cons_un_valor(consulta)
+        if comp is None:
+            consulta = f"""
+            INSERT INTO PUBLIC."ExamenEsp"
+            VALUES('{exam.est_id}', '{exam.fecha}', {exam.calificacion}, {exam.desc_ort})
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        else:
+            raise Exception("El estudiante ya ha sido calificado en este examen")
+        
+    def obtenerExamEsp(self):
+        consulta = """
+        SELECT * FROM PUBLIC."ExamenEsp"
+        """
+        
+        lista_exam_esp = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for exam in lista:
+            examen_esp = ExamenEsp(exam[0], exam[1], exam[2], exam[3])
+            lista_exam_esp.agregar(examen_esp)
+        return lista_exam_esp
+
+
+    def actualizarExamEsp(self, exam_anterior, exam):
+        consulta = f"""
+        UPDATE PUBLIC."ExamenEsp"
+        SET "EstId" = '{exam.est_id}', "Calificacion" = {exam.calificacion}, "DescOrt" = {exam.desc_ort}
+        WHERE "EstId" = '{exam_anterior.est_id}' AND "Fecha" = '{exam_anterior.fecha}'
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+
+    def eliminarExamEsp(self, exam):
+        consulta = f"""
+        DELETE FROM PUBLIC."ExamenEsp"
+        WHERE "Fecha" = '{exam.fecha}' AND "EstId" = '{exam.est_id}'
+        """
+        
+        self.__conexion.cons_sin_retorno(consulta)
 
 

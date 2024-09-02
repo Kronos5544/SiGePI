@@ -1,8 +1,8 @@
 from Modelo.ExamenEspPadre import ExamenEspPadre
 
 class ExamenEsp(ExamenEspPadre):
-    def __init__(self, id_est, fecha, asignatura, calificacion, desc_ort):
-        super().__init__(id_est, fecha, asignatura)
+    def __init__(self, id_est, fecha, calificacion, desc_ort):
+        super().__init__(id_est, fecha)
         self.__calificacion = calificacion
         self.__desc_ort = desc_ort
 

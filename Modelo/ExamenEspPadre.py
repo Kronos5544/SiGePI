@@ -1,13 +1,13 @@
 from Modelo.Examen import Examen
 
 class ExamenEspPadre(Examen):
-    def __init__(self, id_est, fecha, asignatura):
-        super().__init__(fecha, asignatura)
-        self.__id_est = id_est
+    def __init__(self, est_id, fecha):
+        super().__init__(fecha)
+        self.__est_id = est_id
 
     @property
-    def id_est(self):
-        return self.__id_est
-    @id_est.setter
-    def id_est(self, valor):
-        self.__id_est = valor
+    def est_id(self):
+        return self.__est_id
+    @est_id.setter
+    def est_id(self, valor):
+        self.__est_id = valor

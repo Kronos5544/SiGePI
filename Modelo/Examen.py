@@ -1,7 +1,6 @@
 class Examen:
-    def __init__(self, fecha, asignatura):
+    def __init__(self, fecha):
         self.__fecha = fecha
-        self.__asignatura = asignatura
 
     @property
     def fecha(self):
@@ -9,11 +8,4 @@ class Examen:
     @fecha.setter
     def fecha(self, value):
         self.__fecha = value
-
-    @property
-    def asignatura(self):
-        return self.__asignatura
-    @asignatura.setter
-    def asignatura(self, value):
-        self.__asignatura = value
 
