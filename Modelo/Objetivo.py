@@ -1,9 +1,9 @@
-class ObjGen:
-    def __init__(self, id_obj, tipo, asignatura, desc):
+class Objetivo:
+    def __init__(self, id_obj, asignatura, desc_obj_esp, desc_obj_gen):
         self.__id_obj = id_obj
-        self.__tipo = tipo
         self.__asignatura = asignatura
-        self.__desc = desc
+        self.__desc_obj_esp = desc_obj_esp
+        self.__desc_obj_gen = desc_obj_gen
 
     @property
     def id_obj(self):
@@ -27,8 +27,15 @@ class ObjGen:
         self.__asignatura = valor
     
     @property
-    def desc(self):
-        return self.__desc
-    @desc.setter
-    def desc(self, valor):
-        self.__desc = valor
+    def desc_obj_esp(self):
+        return self.__desc_obj_esp
+    @desc_obj_esp.setter
+    def desc_obj_esp(self, valor):
+        self.__desc_obj_esp = valor
+
+    @property
+    def desc_obj_gen(self):
+        return self.__desc_obj_gen
+    @desc_obj_gen.setter
+    def desc_obj_gen(self, valor):
+        self.__desc_obj_gen = valor
