@@ -1,8 +1,11 @@
 from Modelo.Objetivo import Objetivo
 from Modelo.ExamenGen import ExamenGen
 from Modelo.ExamenEsp import ExamenEsp
+from Modelo.PreguntaGen import PreguntaGen
+from Modelo.PreguntaEsp import PreguntaEsp
 from Modelo.ListaEnlazada import ListaEnlazada
 from Modelo.Conexion import Conexion
+from psycopg.errors import UniqueViolation
 
 class Repositorio:
     def __init__(self):
@@ -46,19 +49,36 @@ class Repositorio:
             listaObj.agregar(objetivo)
         return listaObj
     
-    def actualizarObj(self, obj_anterior, obj):
+    def actualizarObj(self, obj):
         """
-        :param obj_anterior: Objeto Objetivo al que se desea actualizar
         :param obj: Objeto Objetivo que contiene los cambios a realizar
         :return: None
         """
         
         consulta = f"""
-        UPDATE Public."Objetivo"    
-        SET "Asignatura" = '{obj.asignatura}' , "DescObjEsp" = '{obj.desc_obj_esp}', "DescObjGen" = '{obj.desc_obj_gen}'
-        WHERE "IdObj" = {obj_anterior.id_obj} 
+        SELECT "IdObj" FROM Public."Objetivo"
+        WHERE "DescObjEsp" = {obj.desc_obj_esp}
         """
-        self.__conexion.cons_sin_retorno(consulta)
+
+        existe = False
+        comp = self.__conexion.cons_mult_valor(consulta)
+
+        if comp is None:
+            raise Exception("El Objetivo a actualizar no existe")
+        else:
+            for id in comp:
+                if id != obj.id_obj:
+                    existe = True
+
+        if not existe:
+            consulta = f"""
+            UPDATE Public."Objetivo"    
+            SET "Asignatura" = '{obj.asignatura}' , "DescObjEsp" = '{obj.desc_obj_esp}', "DescObjGen" = '{obj.desc_obj_gen}'
+            WHERE "IdObj" = {obj.id_obj} 
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        else:
+            raise Exception("Ya existe un objetivo con la misma descripción de objetivo específico")
 
     def eliminarObj(self, obj):
         """
@@ -79,19 +99,14 @@ class Repositorio:
         :return: None
         """
 
-        consulta = f"""
-        SELECT * FROM PUBLIC."Examen" WHERE "Fecha" = '{examen.fecha}'
-        """
-        comp = self.__conexion.cons_un_valor(consulta)
-
-        if comp is None:
+        try:
             consulta = f"""
             INSERT INTO Public."Examen" 
             VALUES ('{examen.fecha}', '{examen.asignatura}', default)
             """
             self.__conexion.cons_sin_retorno(consulta)
-        else:
-            raise Exception("El examen ya existe")
+        except UniqueViolation:
+            raise Exception("El examen a insertar ya existe")
         
     def obtenerExamGen(self):
         """
@@ -114,12 +129,15 @@ class Repositorio:
         :return: None
         """
 
-        consulta = f"""
-        UPDATE PUBLIC."Examen"
-        SET "Fecha" = '{exam.fecha}', "Asignatura" = '{exam.asignatura}', "Calificado" = {exam.calificado}
-        WHERE "Fecha" = '{exam_anterior.fecha}'
-        """
-        self.__conexion.cons_sin_retorno(consulta)
+        try:
+            consulta = f"""
+            UPDATE PUBLIC."Examen"
+            SET "Fecha" = '{exam.fecha}', "Asignatura" = '{exam.asignatura}', "Calificado" = {exam.calificado}
+            WHERE "Fecha" = '{exam_anterior.fecha}'
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe otro examen con la misma fecha")
 
     def eliminarExamGen(self, exam):
         """
@@ -139,17 +157,13 @@ class Repositorio:
         :return: None 
         """
 
-        consulta = f"""
-        SELECT * FROM "ExamenEsp" WHERE "EstId" = '{exam.est_id}' AND "Fecha" = '{exam.fecha}'
-        """
-        comp = self.__conexion.cons_un_valor(consulta)
-        if comp is None:
+        try:
             consulta = f"""
             INSERT INTO PUBLIC."ExamenEsp"
             VALUES('{exam.est_id}', '{exam.fecha}', {exam.calificacion}, {exam.desc_ort})
             """
             self.__conexion.cons_sin_retorno(consulta)
-        else:
+        except UniqueViolation:
             raise Exception("El estudiante ya ha sido calificado en este examen")
         
     def obtenerExamEsp(self):
@@ -174,12 +188,16 @@ class Repositorio:
         :param exam: Objeto ExamenaEsp que representa los cambios a realizar
         :return: None
         """
-        consulta = f"""
-        UPDATE PUBLIC."ExamenEsp"
-        SET "EstId" = '{exam.est_id}', "Calificacion" = {exam.calificacion}, "DescOrt" = {exam.desc_ort}
-        WHERE "EstId" = '{exam_anterior.est_id}' AND "Fecha" = '{exam_anterior.fecha}'
-        """
-        self.__conexion.cons_sin_retorno(consulta)
+
+        try:
+            consulta = f"""
+            UPDATE PUBLIC."ExamenEsp"
+            SET "EstId" = '{exam.est_id}', "Calificacion" = {exam.calificacion}, "DescOrt" = {exam.desc_ort}
+            WHERE "EstId" = '{exam_anterior.est_id}' AND "Fecha" = '{exam_anterior.fecha}'
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe otro estudiante con el mismo ID")
 
     def eliminarExamEsp(self, exam):
         """
@@ -193,4 +211,123 @@ class Repositorio:
         """
         self.__conexion.cons_sin_retorno(consulta)
 
+#--------------------------CRUD(Create, Read, Update) de las preguntas-------------------------------------------------
+    def insertarPreguntaGen(self, pregunta):
+        """
+        Comprueba si la pregunta existe en la tabla y de existir, no la inserta, de lo contrario la inserta
+        :param pregunta: Objeto PreguntaGen a insertar en la tabla
+        :return: None 
+        """
 
+        try:
+            consulta = f"""
+            INSERT INTO PUBLIC."Pregunta"
+            VALUES('{pregunta.fecha}', '{pregunta.no_pregunta}', {pregunta.max_cal})
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("La Pregunta ya existe")
+        
+    def obtenerPreguntaGen(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todas las preguntas generales en forma de Objeto PreguntaGen
+        """
+        consulta = """
+        SELECT * FROM PUBLIC."Pregunta"
+        """
+        
+        lista_preg_gen = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for preg in lista:
+            pregunta_gen = PreguntaGen(preg[0], preg[1], preg[2])
+            lista_preg_gen.agregar(pregunta_gen)
+        return lista_preg_gen
+    
+    def actualizarPregGen(self, preg_anterior, pregunta):
+        """
+        :param preg_anterior: Objeto PreguntaGen que representa la pregunta que se quiere actualizar
+        :param pregunta: Objeto PreguntaGen que representa los cambios a realizar
+        :return: None
+        """
+
+        try:
+            consulta = f"""
+            UPDATE PUBLIC."Pregunta"
+            SET "NoPregunta" = {pregunta.no_pregunta}, "MaxCal" = {pregunta.max_cal}
+            WHERE "NoPregunta" = {preg_anterior.no_pregunta} AND "Fecha" = '{preg_anterior.fecha}'
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe una pregunta con la misma fecha y No pregunta")
+        
+    def eliminarPregGen(self, pregunta):
+        """
+        :param pregunta: Objeto PreguntaGen que representa la pregunta que se quiere eliminar
+        :return: None
+        """
+
+        consulta = f"""
+        DELETE FROM PUBLIC."Pregunta"
+        WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = {pregunta.no_pregunta}
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+
+    def insertarPreguntaEsp(self, pregunta):
+        """
+        Comprueba si la pregunta existe en la tabla y de existir, no la inserta, de lo contrario la inserta
+        :param pregunta: Objeto PreguntaEsp a insertar en la tabla
+        :return: None 
+        """
+
+        try:
+            consulta = f"""
+            INSERT INTO PUBLIC."PreguntaEsp"
+            VALUES('{pregunta.fecha}', '{pregunta.est_id}' ,{pregunta.no_pregunta}, {pregunta.calificacion})
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("La Pregunta ya existe")
+        
+    def obtenerPreguntaEsp(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todas las preguntas específicas en forma de Objeto PreguntaEsp
+        """
+        consulta = """
+        SELECT * FROM PUBLIC."PreguntaEsp"
+        """
+        
+        lista_preg_esp = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for preg in lista:
+            pregunta_esp = PreguntaEsp(preg[0], preg[1], preg[2], preg[3])
+            lista_preg_esp.agregar(pregunta_esp)
+        return lista_preg_esp
+    
+    def actualizarPregEsp(self, preg_anterior, pregunta):
+        """
+        :param preg_anterior: Objeto PreguntaEsp que representa la pregunta que se quiere actualizar
+        :param pregunta: Objeto PreguntaEsp que representa los cambios a realizar
+        :return: None
+        """
+
+        try:
+            consulta = f"""
+            UPDATE PUBLIC."PreguntaEsp"
+            SET "Calificacion" = {pregunta.calificacion}
+            WHERE "Fecha" = '{preg_anterior.fecha}' AND "EstId" = '{preg_anterior.est_id}' AND "NoPregunta" = {preg_anterior.no_pregunta}
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe una pregunta calificada con los mismos datos")
+    
+    def eliminarPregEsp(self, pregunta):
+        """
+        :param pregunta: Objeto PreguntaEsp que representa el examen que se quiere eliminar
+        :return: None
+        """
+
+        consulta = f"""
+        DELETE FROM PUBLIC."PreguntaEsp"
+        WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = {pregunta.no_pregunta} AND "EstId" = '{pregunta.est_id}'
+        """
+        self.__conexion.cons_sin_retorno(consulta)

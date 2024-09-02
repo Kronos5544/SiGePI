@@ -2,9 +2,9 @@ from Modelo.Pregunta import Pregunta
 from Modelo.Examen import Examen
 
 class PreguntaGen(Pregunta, Examen):
-    def __init__(self, no_pregunta, fecha, asignatura, max_cal):
+    def __init__(self, fecha, no_pregunta, max_cal):
         Pregunta.__init__(self, no_pregunta)
-        Examen.__init__(self, fecha, asignatura)
+        Examen.__init__(self, fecha)
         self.__max_cal = max_cal
 
     @property
