@@ -3,6 +3,8 @@ from Modelo.ExamenGen import ExamenGen
 from Modelo.ExamenEsp import ExamenEsp
 from Modelo.PreguntaGen import PreguntaGen
 from Modelo.PreguntaEsp import PreguntaEsp
+from Modelo.PasoGen import PasoGen
+from Modelo.PasoEsp import PasoEsp
 from Modelo.ListaEnlazada import ListaEnlazada
 from Modelo.Conexion import Conexion
 from psycopg.errors import UniqueViolation
@@ -10,6 +12,8 @@ from psycopg.errors import UniqueViolation
 class Repositorio:
     def __init__(self):
         self.__conexion = Conexion()
+
+
 
 #---------CRUD (Create Read Update Delete) de los objetivos---------------------------------------------
     def insertarObj(self, obj):
@@ -90,6 +94,8 @@ class Repositorio:
         DELETE FROM PUBLIC."Objetivo" Where "IdObj" = {obj.id_obj} 
         """
         self.__conexion.cons_sin_retorno(consulta)
+
+
 
 #------------CRUD (Create Read Update Delete) de las clases Examenes------------------------------
     def insertarExamGen(self, examen):
@@ -211,6 +217,8 @@ class Repositorio:
         """
         self.__conexion.cons_sin_retorno(consulta)
 
+
+
 #--------------------------CRUD(Create, Read, Update) de las preguntas-------------------------------------------------
     def insertarPreguntaGen(self, pregunta):
         """
@@ -329,5 +337,69 @@ class Repositorio:
         consulta = f"""
         DELETE FROM PUBLIC."PreguntaEsp"
         WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = {pregunta.no_pregunta} AND "EstId" = '{pregunta.est_id}'
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+
+
+
+#-----------------------CRUD(Create Read Update Delete) de los Pasos---------------------------------------------
+
+    def insertarPasoGen(self, paso):
+        """
+        Comprueba si la pregunta existe en la tabla y de existir, no la inserta, de lo contrario la inserta
+        :param paso: Objeto PasoGen a insertar en la tabla
+        :return: None 
+        """
+
+        try:
+            consulta = f"""
+            INSERT INTO PUBLIC."Paso"
+            VALUES({paso.no_paso}, '{paso.variante}', {paso.no_pregunta}, '{paso.fecha}', {paso.max_cal}, {paso.id_obj})
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("El paso ya existe")
+        
+    def obtenerPasoGen(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todos los pasos generales en forma de Objeto PasoGen
+        """
+        consulta = """
+        SELECT * FROM PUBLIC."Paso"
+        """
+        
+        lista_paso_gen = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for paso in lista:
+            paso_gen = PasoGen(paso[0], paso[1], paso[2], paso[3], paso[4], paso[5])
+            lista_paso_gen.agregar(paso_gen)
+        return lista_paso_gen
+    
+    def actualizarPasoGen(self, paso_anterior, paso):
+        """
+        :param paso_anterior: Objeto PasoGen que representa el paso que se quiere actualizar
+        :param paso: Objeto PasoGen que representa los cambios a realizar
+        :return: None
+        """
+
+        try:
+            consulta = f"""
+            UPDATE PUBLIC."Paso"
+            SET "MaxCal" = {paso.max_cal}, "IdObj" = {paso.id_obj}
+            WHERE "Fecha" = '{paso_anterior.fecha}' AND "Variante" = '{paso_anterior.variante}' AND "NoPregunta" = {paso_anterior.no_pregunta} AND "NoPaso" = {paso.no_paso}
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe otro paso con los mismos datos")
+        
+    def eliminarPasoGen(self, paso):
+        """
+        :param paso: Objeto Paso que representa el paso que se quiere eliminar
+        :return: None
+        """
+
+        consulta = f"""
+        DELETE FROM PUBLIC."Paso"
+        WHERE "NoPaso" = {paso.no_paso} AND "Variante" = '{paso.variante}' AND "NoPregunta" = {paso.no_pregunta} AND "Fecha" = '{paso.fecha}'
         """
         self.__conexion.cons_sin_retorno(consulta)
