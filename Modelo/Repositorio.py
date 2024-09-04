@@ -346,7 +346,7 @@ class Repositorio:
 
     def insertarPasoGen(self, paso):
         """
-        Comprueba si la pregunta existe en la tabla y de existir, no la inserta, de lo contrario la inserta
+        Comprueba si el paso existe en la tabla y de existir, no la inserta, de lo contrario la inserta
         :param paso: Objeto PasoGen a insertar en la tabla
         :return: None 
         """
@@ -394,7 +394,7 @@ class Repositorio:
         
     def eliminarPasoGen(self, paso):
         """
-        :param paso: Objeto Paso que representa el paso que se quiere eliminar
+        :param paso: Objeto PasoEsp que representa el paso que se quiere eliminar
         :return: None
         """
 
@@ -403,3 +403,66 @@ class Repositorio:
         WHERE "NoPaso" = {paso.no_paso} AND "Variante" = '{paso.variante}' AND "NoPregunta" = {paso.no_pregunta} AND "Fecha" = '{paso.fecha}'
         """
         self.__conexion.cons_sin_retorno(consulta)
+
+    
+    def insertarPasoEsp(self, paso):
+        """
+        Comprueba si el paso existe en la tabla y de existir, no la inserta, de lo contrario la inserta
+        :param paso: Objeto PasoEsp a insertar en la tabla
+        :return: None 
+        """
+
+        try:
+            consulta = f"""
+            INSERT INTO PUBLIC."PasoEsp"
+            VALUES('{paso.est_id}', '{paso.fecha}', {paso.no_paso}, '{paso.variante}', {paso.no_pregunta}, {paso.calificacion})
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("El paso ya ha sido calificado en este examen")
+        
+    def obtenerPasoEsp(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todos los pasos específicos en forma de Objeto PasoEsp
+        """
+        consulta = """
+        SELECT * FROM PUBLIC."PasoEsp"
+        """
+        
+        lista_paso_esp = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for paso in lista:
+            paso_esp = PasoEsp(paso[0], paso[1], paso[2], paso[3], paso[4], paso[5])
+            lista_paso_esp.agregar(paso_esp)
+        return lista_paso_esp
+    
+    def actualizarPasoEsp(self, paso_anterior, paso):
+        """
+        :param paso_anterior: Objeto PasoEsp que representa el paso que se quiere actualizar
+        :param paso: Objeto PasoEsp que representa los cambios a realizar
+        :return: None
+        """
+
+        try:
+            consulta = f"""
+            UPDATE PUBLIC."PasoEsp"
+            SET "Calificacion" = {paso.calificacion}
+            WHERE "EstId" = '{paso_anterior.est_id}' AND "Fecha" = '{paso_anterior.fecha}' AND "NoPaso" = {paso_anterior.no_paso} AND "Variante" = '{paso_anterior.variante}' AND "NoPregunta" = {paso_anterior.no_pregunta}
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe otro paso con los mismos datos")
+        
+    def eliminarPasoEsp(self, paso):
+        """
+        :param paso: Objeto PasoEsp que representa el paso que se quiere eliminar
+        :return: None
+        """
+
+        consulta = f"""
+        DELETE FROM PUBLIC."PasoEsp"
+        WHERE "EstId" = '{paso.est_id}' AND "Fecha" = '{paso.fecha}' AND "NoPaso" = {paso.no_paso} AND "Variante" = '{paso.variante}' AND "NoPregunta" = {paso.no_pregunta}
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+        
+    
