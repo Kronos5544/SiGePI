@@ -5,6 +5,7 @@ from Modelo.PreguntaGen import PreguntaGen
 from Modelo.PreguntaEsp import PreguntaEsp
 from Modelo.PasoGen import PasoGen
 from Modelo.PasoEsp import PasoEsp
+from Modelo.Estudiante import Estudiante
 from Modelo.ListaEnlazada import ListaEnlazada
 from Modelo.Conexion import Conexion
 from psycopg.errors import UniqueViolation
@@ -61,7 +62,7 @@ class Repositorio:
         
         consulta = f"""
         SELECT "IdObj" FROM Public."Objetivo"
-        WHERE "DescObjEsp" = {obj.desc_obj_esp}
+        WHERE "DescObjEsp" = '{obj.desc_obj_esp}'
         """
 
         existe = False
@@ -164,6 +165,7 @@ class Repositorio:
         """
 
         try:
+
             consulta = f"""
             INSERT INTO PUBLIC."ExamenEsp"
             VALUES('{exam.est_id}', '{exam.fecha}', {exam.calificacion}, {exam.desc_ort})
@@ -464,5 +466,80 @@ class Repositorio:
         WHERE "EstId" = '{paso.est_id}' AND "Fecha" = '{paso.fecha}' AND "NoPaso" = {paso.no_paso} AND "Variante" = '{paso.variante}' AND "NoPregunta" = {paso.no_pregunta}
         """
         self.__conexion.cons_sin_retorno(consulta)
+
+
+#------------------CRUD(Create Read Update Delete) de Estudiantes
+    def insertarEstudiante(self, estudiante):
+        """
+        Comprueba si el estudiante existe en la tabla y de existir, no la inserta, de lo contrario la inserta
+        :param paso: Objeto Estudiante a insertar en la tabla
+        :return: None 
+        """
+
+        try:
+            consulta = f"""
+            INSERT INTO public."Estudiante" VALUES ('{estudiante.est_id}') 
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("El estudiante ya existe")
         
+    def obtenerEstudiante(self):
+        """
+        :return: Objeto ListaEnlazada que contiene todos los estudiantes en forma de Objeto Estudiante
+        """
+        consulta = """
+        SELECT * FROM PUBLIC."Estudiante"
+        """
+        
+        lista_estudiante = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for est in lista:
+            estudiante = Estudiante(est[0])
+            lista_estudiante.agregar(estudiante)
+        return lista_estudiante
     
+    def actualizarEstudiante(self, est_anterior, est_nuevo):
+        """
+        :param estudiante: Objeto Estudiante que representa el estudiante que se quiere actualizar
+        :param paso: Objeto Estudiante que representa los cambios a realizar
+        :return: None
+        """
+
+        try:
+            consulta = f"""
+            UPDATE public."Estudiante"
+	        SET "EstId"= '{est_nuevo}'
+	        WHERE "EstId" = '{est_anterior}'
+            """
+            self.__conexion.cons_sin_retorno(consulta)
+        except UniqueViolation:
+            raise Exception("Ya existe otro estudiante con la misma Id")
+    
+    def eliminarEstudiante(self, estudiante):
+        """
+        :param paso: Objeto Estudiante que representa el estudiante que se quiere eliminar
+        :return: None
+        """
+
+        consulta = f"""
+        DELETE FROM public."Estudiante"
+	    WHERE "EstId" = '{estudiante.est_id}'
+        """
+        self.__conexion.cons_sin_retorno(consulta)
+
+    
+#--------------Métodos útiles----------------------------------------------------------------
+    def objetivoGenXAsig(self, asignatura):
+        consulta = f"""
+        SELECT "DescObjGen" FROM Public."Objetivo" WHERE "Asignatura" = '{asignatura}'
+        """ 
+        lista_obj_gen = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+
+        if lista is not None:
+            for obj_gen in lista:
+                lista_obj_gen.agregar(obj_gen[0])
+
+        return lista_obj_gen
+        
