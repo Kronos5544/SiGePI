@@ -12,7 +12,6 @@ class GestionarObj(Gestionar):
         self.editar_btn.clicked.connect(self.__presentador.actualizarObjVentana)
 
         self.configurarTabla(["Objetivo Específico", "Objetivo General", "Asignatura"])
-        self.tabla_obj = self.tabla
         
 
     

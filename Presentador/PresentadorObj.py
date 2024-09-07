@@ -30,15 +30,15 @@ class PresentadorObj:
         self.__obj = self.__rep.obtenerObj()
         self.__vista.vaciar_tabla()
         for objetivo in self.__obj:
-            i = self.__vista.tabla_obj.rowCount()
-            self.__vista.tabla_obj.insertRow(i)
+            i = self.__vista.tabla.rowCount()
+            self.__vista.tabla.insertRow(i)
             self.__vista.agregar_elemento_tabla(i, 0, objetivo.obtener_elemento().desc_obj_esp)
             self.__vista.agregar_elemento_tabla(i, 1, objetivo.obtener_elemento().desc_obj_gen)
             self.__vista.agregar_elemento_tabla(i, 2, objetivo.obtener_elemento().asignatura)
-        self.__vista.tabla_obj.resizeColumnsToContents()
+        self.__vista.tabla.resizeColumnsToContents()
 
     def eliminarObj(self):
-        fila_selec = self.__vista.tabla_obj.currentRow()
+        fila_selec = self.__vista.tabla.currentRow()
         if fila_selec != -1:
             self.__rep.eliminarObj(self.__obj.nodo_en(fila_selec).obtener_elemento())
             self.cargarDatos()
@@ -117,7 +117,7 @@ class PresentadorObj:
 #-----------------Ventana Actualizar Objetivo---------------------
     def actualizarObjVentana(self):
         self.__ag_act = ActualizarObj(self)
-        fila_selec = self.__vista.tabla_obj.currentRow()
+        fila_selec = self.__vista.tabla.currentRow()
         self.__obj_actualizar = self.__obj.nodo_en(fila_selec).obtener_elemento()
         self.cargarDatosActualizar()
         self.__vista.bloquearVentana()

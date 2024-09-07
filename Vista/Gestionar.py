@@ -10,7 +10,7 @@ class Gestionar(QWidget):
         self.tabla.itemClicked.connect(self.activarBtnEdicion)
 
     def agregar_elemento_tabla(self, fila, columna, elemento):
-        self.tabla_obj.setItem(fila, columna, QTableWidgetItem(elemento))
+        self.tabla.setItem(fila, columna, QTableWidgetItem(elemento))
 
     def activarBtnEdicion(self):
         self.editar_btn.setEnabled(True)
@@ -21,9 +21,9 @@ class Gestionar(QWidget):
         self.eliminar_btn.setEnabled(False)
 
     def vaciar_tabla(self):
-        e = self.tabla_obj.rowCount()
+        e = self.tabla.rowCount()
         for i in range(e):
-            self.tabla_obj.removeRow(0)
+            self.tabla.removeRow(0)
 
     def bloquearVentana(self):
         self.setEnabled(False)

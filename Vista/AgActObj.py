@@ -1,5 +1,5 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QWidget, QMessageBox, QTableWidget
+from PyQt5.QtWidgets import QWidget, QMessageBox
 
 class AgActObj(QWidget):
     def __init__(self, presentador):

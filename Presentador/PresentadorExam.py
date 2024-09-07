@@ -6,5 +6,4 @@ class PresentadorExam:
 
     def iniciar(self):
         self.__vista = GestionarExam(self)
-        self.__vista.show()
         

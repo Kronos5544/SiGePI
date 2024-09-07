@@ -472,7 +472,7 @@ class Repositorio:
     def insertarEstudiante(self, estudiante):
         """
         Comprueba si el estudiante existe en la tabla y de existir, no la inserta, de lo contrario la inserta
-        :param paso: Objeto Estudiante a insertar en la tabla
+        :param estudiante: Objeto Estudiante a insertar en la tabla
         :return: None 
         """
 
@@ -501,16 +501,16 @@ class Repositorio:
     
     def actualizarEstudiante(self, est_anterior, est_nuevo):
         """
-        :param estudiante: Objeto Estudiante que representa el estudiante que se quiere actualizar
-        :param paso: Objeto Estudiante que representa los cambios a realizar
+        :param est_anterior: Objeto Estudiante que representa el estudiante que se quiere actualizar
+        :param est_nuevo: Objeto Estudiante que representa los cambios a realizar
         :return: None
         """
 
         try:
             consulta = f"""
             UPDATE public."Estudiante"
-	        SET "EstId"= '{est_nuevo}'
-	        WHERE "EstId" = '{est_anterior}'
+	        SET "EstId"= '{est_nuevo.est_id}'
+	        WHERE "EstId" = '{est_anterior.est_id}'
             """
             self.__conexion.cons_sin_retorno(consulta)
         except UniqueViolation:
@@ -518,7 +518,7 @@ class Repositorio:
     
     def eliminarEstudiante(self, estudiante):
         """
-        :param paso: Objeto Estudiante que representa el estudiante que se quiere eliminar
+        :param estudiante: Objeto Estudiante que representa el estudiante que se quiere eliminar
         :return: None
         """
 
