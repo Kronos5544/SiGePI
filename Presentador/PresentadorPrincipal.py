@@ -4,6 +4,7 @@ from Vista.VentanaPrincipal import VentanaPrincipal
 from Modelo.Repositorio import Repositorio
 from Presentador.PresentadorExam import PresentadorExam
 from Presentador.PresentadorObj import PresentadorObj
+from Presentador.PresentadorEst import PresentadorEst
 
 class PresentadorPrincipal:
     def __init__(self):
@@ -26,7 +27,10 @@ class PresentadorPrincipal:
         gestionar_obj = PresentadorObj(self.__rep, self.__vista)
         gestionar_obj.iniciar()
 
-    
+    #Iniciar Ventana Gestionar Estudiantes
+    def gestionarEst(self):
+        gestionar_est = PresentadorEst(self.__rep, self.__vista)
+        gestionar_est.iniciar()
     
 
         

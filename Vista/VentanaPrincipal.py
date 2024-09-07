@@ -10,6 +10,7 @@ class VentanaPrincipal(QMainWindow):
         self.setWindowTitle("SiGePI")
 
         self.salir_btn.clicked.connect(self.close)
+        self.gest_est_btn.clicked.connect(self.__presentador.gestionarEst)
         self.gest_exam_btn.clicked.connect(self.__presentador.gestionarExam)
         self.gest_obj_btn.clicked.connect(self.__presentador.gestionarObj)
 
