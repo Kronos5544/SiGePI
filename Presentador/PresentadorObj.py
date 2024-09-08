@@ -28,7 +28,7 @@ class PresentadorObj:
     def cargarDatos(self):
         self.__vista.desactivarBtnEdicion()
         self.__obj = self.__rep.obtenerObj()
-        self.__vista.vaciar_tabla()
+        self.__vista.vaciarTabla()
         for objetivo in self.__obj:
             i = self.__vista.tabla.rowCount()
             self.__vista.tabla.insertRow(i)
@@ -76,7 +76,7 @@ class PresentadorObj:
         self.__ag_act.desbloquearVentana()
 
     def cargarDatosObjGen(self):
-        self.__selec.vaciar_tabla()
+        self.__selec.vaciarTabla()
         self.__selec.configurarTabla(["Objetivo General"])
         lista = self.__rep.objetivoGenXAsig(self.__ag_act.valor_asignatura)
         for objetivo_gen in lista:

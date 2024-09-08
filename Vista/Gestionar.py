@@ -20,7 +20,7 @@ class Gestionar(QWidget):
         self.editar_btn.setEnabled(False)
         self.eliminar_btn.setEnabled(False)
 
-    def vaciar_tabla(self):
+    def vaciarTabla(self):
         e = self.tabla.rowCount()
         for i in range(e):
             self.tabla.removeRow(0)

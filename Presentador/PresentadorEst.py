@@ -24,7 +24,7 @@ class PresentadorEst:
     def cargarDatos(self):
         self.__vista.desactivarBtnEdicion()
         self.__est = self.__rep.obtenerEstudiante()
-        self.__vista.vaciar_tabla()
+        self.__vista.vaciarTabla()
         for estudiante in self.__est:
             i = self.__vista.tabla.rowCount()
             self.__vista.tabla.insertRow(i)

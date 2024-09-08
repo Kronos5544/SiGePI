@@ -23,18 +23,13 @@ class Seleccion(QWidget):
     def confNombAbrirGestorBtn(self, nombre):
         self.abrir_gestor_btn.setText(nombre)
 
-    def vaciar_tabla(self):
-        e = self.tabla.rowCount()
-        for i in range(e):
-            self.tabla.removeRow(0)
-
     def mostrarError(self, error):
         return QMessageBox.critical(self, "Error", error)
 
     def agregar_elemento_tabla(self, fila, columna, elemento):
         self.tabla.setItem(fila, columna, QTableWidgetItem(elemento))
 
-    def vaciar_tabla(self):
+    def vaciarTabla(self):
         e = self.tabla.rowCount()
         for i in range(e):
             self.tabla.removeRow(0)

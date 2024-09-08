@@ -19,7 +19,7 @@ class PresentadorPrincipal:
 
     #Iniciar Ventana Gestionar Exámenes
     def gestionarExam(self):
-        gestionar_exam = PresentadorExam()
+        gestionar_exam = PresentadorExam(self.__rep, self.__vista)
         gestionar_exam.iniciar()
 
     #Iniciar Ventana Gestionar Objetivos
