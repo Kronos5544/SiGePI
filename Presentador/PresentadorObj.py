@@ -128,7 +128,6 @@ class PresentadorObj:
             self.__ag_act.validarDatos()
             nuevo_obj = Objetivo(self.__obj_actualizar.id_obj, self.__ag_act.valor_asignatura, self.__ag_act.valor_obj_esp, self.__ag_act.valor_obj_gen)
             self.__rep.actualizarObj(nuevo_obj)
-            self.cargarDatos()
             self.__ag_act.close()
         except Exception as error:
             self.__ag_act.mostrarError(str(error))

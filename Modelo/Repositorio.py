@@ -125,7 +125,7 @@ class Repositorio:
         lista_exam_gen = ListaEnlazada()
         lista = self.__conexion.cons_mult_valor(consulta)
         for exam in lista:
-            examen = ExamenGen(exam[0], exam[1], exam[2])
+            examen = ExamenGen(str(exam[0]), exam[1], exam[2])
             lista_exam_gen.agregar(examen)
         return lista_exam_gen
     
@@ -174,18 +174,19 @@ class Repositorio:
         except UniqueViolation:
             raise Exception("El estudiante ya ha sido calificado en este examen")
         
-    def obtenerExamEsp(self):
+    def obtenerExamEsp(self, exam):
         """
         :return: Objeto ListaEnlazada que contiene todos los examenes generales en forma de Objeto ExamenEsp
         """
-        consulta = """
+        consulta = f"""
         SELECT * FROM PUBLIC."ExamenEsp"
+        WHERE "Fecha" = '{exam.fecha}'
         """
         
         lista_exam_esp = ListaEnlazada()
         lista = self.__conexion.cons_mult_valor(consulta)
         for exam in lista:
-            examen_esp = ExamenEsp(exam[0], exam[1], exam[2], exam[3])
+            examen_esp = ExamenEsp(exam[0], str(exam[1]), exam[2], exam[3])
             lista_exam_esp.agregar(examen_esp)
         return lista_exam_esp
 
@@ -238,18 +239,19 @@ class Repositorio:
         except UniqueViolation:
             raise Exception("La Pregunta ya existe")
         
-    def obtenerPreguntaGen(self):
+    def obtenerPreguntaGen(self, exam):
         """
         :return: Objeto ListaEnlazada que contiene todas las preguntas generales en forma de Objeto PreguntaGen
         """
-        consulta = """
+        consulta = f"""
         SELECT * FROM PUBLIC."Pregunta"
+        WHERE "Fecha" = '{exam.fecha}'
         """
         
         lista_preg_gen = ListaEnlazada()
         lista = self.__conexion.cons_mult_valor(consulta)
         for preg in lista:
-            pregunta_gen = PreguntaGen(preg[0], preg[1], preg[2])
+            pregunta_gen = PreguntaGen(str(preg[0]), preg[1], preg[2])
             lista_preg_gen.agregar(pregunta_gen)
         return lista_preg_gen
     
@@ -298,18 +300,19 @@ class Repositorio:
         except UniqueViolation:
             raise Exception("La Pregunta ya existe")
         
-    def obtenerPreguntaEsp(self):
+    def obtenerPreguntaEsp(self, exam_esp):
         """
         :return: Objeto ListaEnlazada que contiene todas las preguntas específicas en forma de Objeto PreguntaEsp
         """
-        consulta = """
+        consulta = f"""
         SELECT * FROM PUBLIC."PreguntaEsp"
+        WHERE "EstId" = '{exam_esp.est_id}' AND "Fecha" = '{exam_esp.fecha}'
         """
         
         lista_preg_esp = ListaEnlazada()
         lista = self.__conexion.cons_mult_valor(consulta)
         for preg in lista:
-            pregunta_esp = PreguntaEsp(preg[0], preg[1], preg[2], preg[3])
+            pregunta_esp = PreguntaEsp(str(preg[0]), preg[1], preg[2], preg[3])
             lista_preg_esp.agregar(pregunta_esp)
         return lista_preg_esp
     
@@ -362,18 +365,19 @@ class Repositorio:
         except UniqueViolation:
             raise Exception("El paso ya existe")
         
-    def obtenerPasoGen(self):
+    def obtenerPasoGen(self, pregunta, variante):
         """
         :return: Objeto ListaEnlazada que contiene todos los pasos generales en forma de Objeto PasoGen
         """
-        consulta = """
+        consulta = f"""
         SELECT * FROM PUBLIC."Paso"
+        WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = {pregunta.no_pregunta} AND "Variante" = '{variante}'
         """
         
         lista_paso_gen = ListaEnlazada()
         lista = self.__conexion.cons_mult_valor(consulta)
         for paso in lista:
-            paso_gen = PasoGen(paso[0], paso[1], paso[2], paso[3], paso[4], paso[5])
+            paso_gen = PasoGen(paso[0], paso[1], paso[2], str(paso[3]), paso[4], paso[5])
             lista_paso_gen.agregar(paso_gen)
         return lista_paso_gen
     
@@ -423,18 +427,19 @@ class Repositorio:
         except UniqueViolation:
             raise Exception("El paso ya ha sido calificado en este examen")
         
-    def obtenerPasoEsp(self):
+    def obtenerPasoEsp(self, pregunta):
         """
         :return: Objeto ListaEnlazada que contiene todos los pasos específicos en forma de Objeto PasoEsp
         """
-        consulta = """
+        consulta = f"""
         SELECT * FROM PUBLIC."PasoEsp"
+        WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = '{pregunta.no_pregunta}' AND "EstId" = {pregunta.est_id}
         """
         
         lista_paso_esp = ListaEnlazada()
         lista = self.__conexion.cons_mult_valor(consulta)
         for paso in lista:
-            paso_esp = PasoEsp(paso[0], paso[1], paso[2], paso[3], paso[4], paso[5])
+            paso_esp = PasoEsp(paso[0], str(paso[1]), paso[2], paso[3], paso[4], paso[5])
             lista_paso_esp.agregar(paso_esp)
         return lista_paso_esp
     
@@ -542,4 +547,150 @@ class Repositorio:
                 lista_obj_gen.agregar(obj_gen[0])
 
         return lista_obj_gen
+    
+    def examGenTieneExamEsp(self, examen):
+        consulta = f"""
+        SELECT * FROM Public."ExamenEsp"
+        WHERE "Fecha" = '{examen.fecha}'
+        """
+        exam = self.__conexion.cons_un_valor(consulta)
+
+        if exam is None:
+            return False
+        else:
+            return True
+    
+    def compClaveExamGen(self, examen):
+        consulta = f"""SELECT comp_clave_exam('{examen.fecha}')"""
+        self.__conexion.cons_un_valor(consulta)
+        if True in consulta:
+            return True
+        else:
+            return False
         
+    def varianteExamenGen(self, examen):
+        consulta = f"""
+        SELECT DISTINCT "Variante" FROM Public."Paso"
+        WHERE "Fecha" = '{examen.fecha}'
+        """
+
+        variantes = self.__conexion.cons_mult_valor(consulta)
+        variantes_fin = []
+
+        if len(variantes) == 0:
+            variantes_fin = ["A"]
+        else:
+            for e in variantes:
+                variantes_fin.append(e[0])
+        
+        return variantes_fin
+
+    def variantePreg(self, preg):
+        consulta = f"""
+        SELECT DISTINCT "Variante" FROM Public."Paso"
+        WHERE "Fecha" = '{preg.fecha}' AND "NoPregunta" = {preg.no_pregunta}
+        """
+
+        variantes = self.__conexion.cons_mult_valor(consulta)
+        variantes_fin = []
+
+        if len(variantes) == 0:
+            variantes_fin = ["A"]
+        else:
+            for e in variantes:
+                variantes_fin.append(e[0])
+        
+        return variantes_fin
+    
+    def compVariante(self, preg, variante):
+        consulta = f"""
+        SELECT comp_clave_preg_x_var('{preg.fecha}', {preg.no_pregunta}, '{variante}')
+        """
+
+        comp = self.__conexion.cons_un_valor(consulta)
+        
+        if True in comp:
+            comp = "OK"
+        else:
+            comp = "INC"
+        return comp
+    
+    def calcCalExamGen(self, exam):
+        consulta = f"""
+        SELECT SUM("MaxCal") FROM Public."Pregunta"
+        WHERE "Fecha" = '{exam.fecha}'
+        """
+        resultado = self.__conexion.cons_un_valor(consulta)
+        if None in resultado:
+            return 0
+        return resultado[0]
+    
+    def compCalExamenGen(self, exam):
+        consulta = f"""
+        SELECT comp_cal_exam('{exam.fecha}')
+        """
+        if True in self.__conexion.cons_un_valor(consulta):
+            return True
+        else:
+            return False
+        
+    def unirPasoGenObj(self, preg, var):
+        consulta = f"""
+        SELECT "NoPaso", "MaxCal", "DescObjEsp", "DescObjGen"
+        FROM (SELECT * FROM Public."Paso" WHERE "Fecha" = '{preg.fecha}' AND "NoPregunta" = {preg.no_pregunta} AND "Variante" = '{var}') AS "Pasos"
+        JOIN Public."Objetivo" ON "Pasos"."IdObj" = "Objetivo"."IdObj"
+        """
+        
+        cons = self.__conexion.cons_mult_valor(consulta)
+        tabla = ListaEnlazada()
+
+        for e in cons:
+            tabla.agregar(e)
+
+        return tabla
+    
+    def calcCalPreg(self, preg, var):
+        consulta = f"""
+        SELECT SUM("MaxCal") FROM Public."Paso"
+        WHERE "Fecha" = '{preg.fecha}' AND "NoPregunta" = {preg.no_pregunta} AND "Variante" = '{var}'
+        """
+        resultado = self.__conexion.cons_un_valor(consulta)
+        if None in resultado:
+            return 0
+        return resultado[0]
+    
+    def obtenerAsigExam(self, fecha):
+        consulta = f"""
+        SELECT "Asignatura" FROM Public."Examen"
+        WHERE "Fecha" = '{fecha}'
+        """
+        resultado = self.__conexion.cons_un_valor(consulta)
+
+        return resultado[0]
+    
+    def obtenerObjXAsig(self, asig):
+        consulta = f"""
+        SELECT * FROM Public."Objetivo"
+        WHERE "Asignatura" = '{asig}'
+        ORDER BY "IdObj" ASC
+        """
+
+        listaObj = ListaEnlazada()
+        lista = self.__conexion.cons_mult_valor(consulta)
+        for obj in lista:
+            objetivo = Objetivo(obj[0], obj[1], obj[2], obj[3])
+            listaObj.agregar(objetivo)
+        return listaObj
+    
+    def examGenTienePasos(self, exam):
+        consulta = f"""
+        SELECT * FROM Public."Paso"
+        WHERE "Fecha" = '{exam.fecha}'
+        """
+        
+        resultado = self.__conexion.cons_un_valor(consulta)
+
+        if resultado != None:
+            return True
+        else:
+            return False
