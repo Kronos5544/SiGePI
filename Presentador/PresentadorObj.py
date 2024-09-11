@@ -63,6 +63,7 @@ class PresentadorObj:
 #-------------------Ventana Seleccionar Objetivo General------------------------------------
     def seleccionarVentana(self):
         self.__selec = Seleccion(self)
+        self.__selec.desactivarBtnSelec()
         self.cargarDatosObjGen()
         self.__selec.configurarNombreVentana("Selección Objetivo")
         self.__selec.confNombAbrirGestorBtn("Nuevo")

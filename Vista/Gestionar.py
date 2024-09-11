@@ -1,5 +1,5 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QTableWidgetItem, QMessageBox
 
 class Gestionar(QWidget):
     def __init__(self, presentador):
@@ -29,7 +29,11 @@ class Gestionar(QWidget):
         self.setEnabled(False)
 
     def desbloquearVentana(self):
+        self.__presentador.cargarDatos()
         self.setEnabled(True)
+
+    def mostrarError(self, error):
+        return QMessageBox.critical(self, "Error", error)
 
     def closeEvent(self, event):
         if self.isEnabled():

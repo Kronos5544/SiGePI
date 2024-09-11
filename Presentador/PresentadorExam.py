@@ -3,6 +3,7 @@ from Vista.AgregarExamGen import AgregarExamGen
 from Vista.ActualizarExamGen import ActualizarExamGen
 from Modelo.ExamenGen import ExamenGen
 from Presentador.PresentadorPregGen import PresentadorPregGen
+from Presentador.PresentadorExamEsp import PresentadorExamEsp
 
 class PresentadorExam:
     def __init__(self, rep, vista_princ):
@@ -115,5 +116,20 @@ class PresentadorExam:
                 self.__ag_act.bloquearVentana()
         except Exception as error:
             self.__ag_act.mostrarError(str(error))
+
+#--------------Ventana administrar calificaciones--------------
+    def adminExamenEsp(self):
+        try:
+            self.__exam_anterior = self.__exam_gen.nodo_en(self.__vista.tabla.currentRow()).obtener_elemento()
+            if self.__rep.compClaveExamGen(self.__exam_anterior):
+                selec = self.__vista.mostrarAdvertencia("Una vez comience a calificar el examen no podrá modificar su clave\n¿Desea continuar?")
+                if selec:
+                    self.__exam_esp = PresentadorExamEsp(self.__rep, self.__vista, self.__exam_anterior)
+                    self.__exam_esp.iniciar()
+                    self.__vista.bloquearVentana()
+            else:
+                raise Exception("La clave del examen está incorrecta, seleccione el examen y presione en editar examen para configurar la clave")
+        except Exception as error:
+            self.__vista.mostrarError(str(error))
     
 

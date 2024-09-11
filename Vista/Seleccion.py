@@ -8,6 +8,7 @@ class Seleccion(QWidget):
         uic.loadUi("./Vista/ui/Seleccion.ui", self)
 
         self.tabla.itemDoubleClicked.connect(self.__presentador.selec)
+        self.tabla.itemClicked.connect(self.activarBtnSelec)
         self.selec_btn.clicked.connect(self.__presentador.selec)
         self.abrir_gestor_btn.clicked.connect(self.__presentador.gestor)
         self.cancelar_btn.clicked.connect(self.close)
@@ -16,6 +17,12 @@ class Seleccion(QWidget):
         self.tabla.setColumnCount(len(elementos))
         self.tabla.setHorizontalHeaderLabels(elementos)
         self.tabla.resizeColumnsToContents()
+
+    def desactivarBtnSelec(self):
+        self.selec_btn.setEnabled(False)
+
+    def activarBtnSelec(self):
+        self.selec_btn.setEnabled(True)
 
     def configurarNombreVentana(self, nombre):
         self.setWindowTitle(nombre)

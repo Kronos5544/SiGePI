@@ -15,6 +15,7 @@ class GestionarExam(QWidget):
         self.agregar_btn.clicked.connect(self.__presentador.agregarExamVentana)
         self.editar_btn.clicked.connect(self.__presentador.actualizarExamVentana)
         self.eliminar_btn.clicked.connect(self.__presentador.eliminarExam)
+        self.calificaciones_btn.clicked.connect(self.__presentador.adminExamenEsp)
         self.finalizar_btn.clicked.connect(self.__presentador.finalizarCalExam)
 
 

@@ -307,6 +307,7 @@ class Repositorio:
         consulta = f"""
         SELECT * FROM PUBLIC."PreguntaEsp"
         WHERE "EstId" = '{exam_esp.est_id}' AND "Fecha" = '{exam_esp.fecha}'
+        ORDER BY "NoPregunta" ASC
         """
         
         lista_preg_esp = ListaEnlazada()
@@ -427,13 +428,14 @@ class Repositorio:
         except UniqueViolation:
             raise Exception("El paso ya ha sido calificado en este examen")
         
-    def obtenerPasoEsp(self, pregunta):
+    def obtenerPasoEsp(self, pregunta, variante):
         """
         :return: Objeto ListaEnlazada que contiene todos los pasos específicos en forma de Objeto PasoEsp
         """
         consulta = f"""
         SELECT * FROM PUBLIC."PasoEsp"
-        WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = '{pregunta.no_pregunta}' AND "EstId" = {pregunta.est_id}
+        WHERE "Fecha" = '{pregunta.fecha}' AND "NoPregunta" = '{pregunta.no_pregunta}' AND "EstId" = '{pregunta.est_id}' AND "Variante" = '{variante}'
+        ORDER BY "NoPaso" ASC
         """
         
         lista_paso_esp = ListaEnlazada()
@@ -562,8 +564,8 @@ class Repositorio:
     
     def compClaveExamGen(self, examen):
         consulta = f"""SELECT comp_clave_exam('{examen.fecha}')"""
-        self.__conexion.cons_un_valor(consulta)
-        if True in consulta:
+        resultado = self.__conexion.cons_un_valor(consulta)
+        if True in resultado:
             return True
         else:
             return False
@@ -639,6 +641,7 @@ class Repositorio:
         SELECT "NoPaso", "MaxCal", "DescObjEsp", "DescObjGen"
         FROM (SELECT * FROM Public."Paso" WHERE "Fecha" = '{preg.fecha}' AND "NoPregunta" = {preg.no_pregunta} AND "Variante" = '{var}') AS "Pasos"
         JOIN Public."Objetivo" ON "Pasos"."IdObj" = "Objetivo"."IdObj"
+        ORDER BY "NoPaso" ASC
         """
         
         cons = self.__conexion.cons_mult_valor(consulta)
@@ -694,3 +697,36 @@ class Repositorio:
             return True
         else:
             return False
+        
+    def unirPregEspPregGen(self, exam_esp):
+        consulta = f"""
+        SELECT "PreguntaEsp"."NoPregunta", "Calificacion", "MaxCal" FROM Public."PreguntaEsp"
+        JOIN Public."Pregunta" ON "Pregunta"."NoPregunta" = "PreguntaEsp"."NoPregunta" 
+        AND "Pregunta"."Fecha" = "PreguntaEsp"."Fecha"
+        WHERE "PreguntaEsp"."Fecha" = '{exam_esp.fecha}' AND "PreguntaEsp"."EstId" = '{exam_esp.est_id}'
+        ORDER BY "PreguntaEsp"."NoPregunta" ASC
+        """
+
+        return self.__conexion.cons_mult_valor(consulta)
+    
+    def obtenerVarPregEsp(self, preg_esp):
+        consulta = f"""
+        SELECT "Variante" FROM Public."PasoEsp"
+        WHERE "NoPregunta" = {preg_esp.no_pregunta} AND "Fecha" = '{preg_esp.fecha}' AND "EstId" = '{preg_esp.est_id}'
+        """
+
+        return self.__conexion.cons_un_valor(consulta)[0]
+    
+    def unirPasoEspGenObj(self, preg_esp, var):
+        consulta = f"""
+        SELECT "PasoEsp"."NoPaso", "Calificacion", "MaxCal", "DescObjEsp", "DescObjGen" FROM Public."PasoEsp"
+        JOIN Public."Paso" ON "Paso"."NoPregunta" = "PasoEsp"."NoPregunta" AND "PasoEsp"."Variante" = "Paso"."Variante" AND "PasoEsp"."NoPaso" = "Paso"."NoPaso" AND "PasoEsp"."Fecha" = "Paso"."Fecha"
+        JOIN Public."Objetivo" ON "Paso"."IdObj" = "Objetivo"."IdObj"
+        WHERE "EstId" = '{preg_esp.est_id}' AND "PasoEsp"."NoPregunta" = {preg_esp.no_pregunta} AND "PasoEsp"."Fecha" = '{preg_esp.fecha}' AND "PasoEsp"."Variante" = '{var}'
+        ORDER BY "PasoEsp"."NoPaso" ASC
+        """
+
+        return self.__conexion.cons_mult_valor(consulta)
+    
+
+        

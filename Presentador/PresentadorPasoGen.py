@@ -145,6 +145,8 @@ class PresentadorPasoGen:
         self.__ag_act.bloquearVentana()
         
     def cargarDatosSelec(self):
+        self.__selec.desactivarBtnSelec()
+        self.__selec.vaciarTabla()
         self.__selec.configurarNombreVentana("Seleccionar Objetivo")
         self.__selec.configurarTabla(["ID Objetivo", "Objetivo Especifico", "Objetivo General"])
         self.__selec.confNombAbrirGestorBtn("Gestor Objetivos")
